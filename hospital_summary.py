@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # hospital_summary.py
 
 import os
@@ -196,5 +196,4 @@ def generate_hospital_summary(uhid):
 
     c.save()
 
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
     return pdf_path
