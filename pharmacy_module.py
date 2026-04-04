@@ -60,12 +60,12 @@ def pharmacy_dashboard():
 
     else:
 
-import streamlit as st
-import pandas as pd
-import os
-from datetime import datetime
+        import streamlit as st
+        import pandas as pd
+        import os
+        from datetime import datetime
 
-SALES_FILE = "Pharmacy_Sales.csv"
+        SALES_FILE = "Pharmacy_Sales.csv"
 
 def pharmacy_dashboard():
 
