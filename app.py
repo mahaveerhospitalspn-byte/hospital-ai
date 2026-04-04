@@ -3842,11 +3842,7 @@ elif st.session_state.page == "online_appointments":
 
         
 
-<<<<<<< HEAD
 
-=======
-=======
->>>>>>> a9710cb62bb2e1f8a39a18a228c92992279fe146
 import streamlit as st
 import os
 import pandas as pd
