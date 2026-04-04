@@ -503,7 +503,7 @@ def opd_doctor_panel(doctor_name):
         conn.commit()
 
         st.success("All waiting patients marked as Consulted")
-=======
+
 import streamlit as st
 import sqlite3
 from datetime import datetime
