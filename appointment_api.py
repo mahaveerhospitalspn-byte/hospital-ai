@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -103,7 +103,7 @@ def test():
 
 # ================= RUN =================
 if __name__ == "__main__":
-=======
+
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -208,5 +208,5 @@ def test():
 
 # ================= RUN =================
 if __name__ == "__main__":
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

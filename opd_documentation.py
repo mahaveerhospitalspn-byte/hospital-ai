@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import streamlit as st
 from datetime import datetime
 import sqlite3
@@ -406,7 +406,7 @@ def opd_documentation_panel(opd_row):
         conn.close()
 
         st.success("Clinical Note Saved Successfully")
-=======
+
 import streamlit as st
 from datetime import datetime
 import sqlite3
@@ -814,5 +814,5 @@ def opd_documentation_panel(opd_row):
         conn.close()
 
         st.success("Clinical Note Saved Successfully")
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
         st.session_state.prescription_list = []

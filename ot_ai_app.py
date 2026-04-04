@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import streamlit as st
 import datetime
 import os
@@ -601,7 +601,7 @@ Dr {surgeon}
             st.success("PDF Saved Successfully")
 
 
-=======
+
 import streamlit as st
 import datetime
 import os
@@ -1204,5 +1204,5 @@ Dr {surgeon}
             st.success("PDF Saved Successfully")
 
 
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
         st.code(edited_note)

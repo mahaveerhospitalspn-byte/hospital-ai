@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import streamlit as st
 import pandas as pd
 import os
@@ -59,7 +59,7 @@ def pharmacy_dashboard():
             st.warning("CSV must contain 'Date' and 'Net Amount' columns")
 
     else:
-=======
+
 import streamlit as st
 import pandas as pd
 import os
@@ -120,5 +120,5 @@ def pharmacy_dashboard():
             st.warning("CSV must contain 'Date' and 'Net Amount' columns")
 
     else:
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
         st.info("No Sales Data Available")

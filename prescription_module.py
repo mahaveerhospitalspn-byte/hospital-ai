@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import streamlit as st
 import os
 from datetime import datetime
@@ -136,7 +136,7 @@ def prescription_panel(uhid, patient_name):
                 f.write(advice)
 
         st.success("Prescription Saved")
-=======
+
 import streamlit as st
 import os
 from datetime import datetime
@@ -274,4 +274,4 @@ def prescription_panel(uhid, patient_name):
                 f.write(advice)
 
         st.success("Prescription Saved")
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+

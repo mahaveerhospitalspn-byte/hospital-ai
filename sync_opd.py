@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import pyodbc
 import os
 import time
@@ -56,7 +56,7 @@ def sync_opd():
 if __name__ == "__main__":
     while True:
         sync_opd()
-=======
+
 import pyodbc
 import os
 import time
@@ -114,5 +114,5 @@ def sync_opd():
 if __name__ == "__main__":
     while True:
         sync_opd()
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
         time.sleep(10)  # check every 10 seconds

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import subprocess
 import webbrowser
 import time
@@ -27,7 +27,7 @@ subprocess.Popen([
 time.sleep(4)
 
 # ✅ Open locally
-=======
+
 import subprocess
 import webbrowser
 import time
@@ -56,5 +56,5 @@ subprocess.Popen([
 time.sleep(4)
 
 # ✅ Open locally
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
 webbrowser.open("http://localhost:8501")

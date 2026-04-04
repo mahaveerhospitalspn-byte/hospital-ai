@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 #import pyodbc
 import sqlite3
 import os
@@ -113,7 +113,7 @@ if __name__ == "__main__":
             time.sleep(5)
         except Exception as e:
             print("Error:", e)
-=======
+
 #import pyodbc
 import sqlite3
 import os
@@ -228,5 +228,5 @@ if __name__ == "__main__":
             time.sleep(5)
         except Exception as e:
             print("Error:", e)
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
             time.sleep(15)

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import streamlit as st
 import sqlite3
 from datetime import datetime
@@ -194,9 +194,9 @@ def end_all_waiting_patients():
 # ----------------------------------------
 # RECEPTION PANEL
 # ----------------------------------------
-# =========================================================
+
 # 🧾 LIVE OPD RECEPTION PANEL (CLEAN VERSION)
-# =========================================================
+
 def opd_reception_panel():
 
     create_opd_table()
@@ -1008,5 +1008,5 @@ def opd_doctor_panel(doctor_name):
         conn.commit()
 
         st.success("All waiting patients marked as Consulted")
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
         st.rerun()
