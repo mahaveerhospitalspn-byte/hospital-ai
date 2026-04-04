@@ -97,7 +97,7 @@ def generate_hospital_summary(uhid):
 
     c.save()
 
-=======
+
 # hospital_summary.py
 
 import os
