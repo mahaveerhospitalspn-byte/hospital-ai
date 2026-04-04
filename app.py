@@ -3841,8 +3841,6 @@ elif st.session_state.page == "online_appointments":
     conn.close()       
 
         
-
-
 import streamlit as st
 import os
 import pandas as pd
@@ -7653,5 +7651,5 @@ elif st.session_state.page == "online_appointments":
 
         
 
->>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69
+
     
