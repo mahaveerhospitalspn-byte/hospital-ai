@@ -1,0 +1,22 @@
+<<<<<<< HEAD
+streamlit
+pandas
+requests
+supabase
+reportlab
+python-dateutil
+streamlit-autorefresh
+=======
+streamlit==1.33.0
+pandas==2.2.2
+requests==2.31.0
+
+supabase==2.3.0
+postgrest==0.13.2
+gotrue==2.4.2
+httpx==0.24.1
+
+reportlab==4.1.0
+python-dateutil==2.9.0
+streamlit-autorefresh==1.0.1
+>>>>>>> d67240b6b301f5efd6ea7b3a00d8b3b998948d69

@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.spec
+build
+dist
+.streamlit
+Certificates
+DayCare_Records
+Records
+saved_ot_notes
+indian_medicine_data.csv
