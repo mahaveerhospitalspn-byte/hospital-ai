@@ -4956,7 +4956,7 @@ if st.session_state.page == "login":
         else:
             st.error("Invalid username or password")
     import threading
-    from sync_his_to_opd_live import sync_data
+    
 
     def background_sync():
         while True:
