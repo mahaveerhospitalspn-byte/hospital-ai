@@ -11,7 +11,8 @@ from doctor_master import DOCTOR_DATABASE
 import pandas as pd
 import os
 from opd_documentation import opd_documentation_panel
-
+from supabase import create_client
+from datetime import date
 
 # Get absolute project folder path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -214,8 +215,14 @@ def opd_reception_panel():
     # ===============================
     # 📊 LIVE METRICS
     # ===============================
-    cursor.execute("SELECT * FROM opd_live WHERE date = ?", (today,))
-    rows = cursor.fetchall()
+    today = str(date.today())
+
+    result = supabase.table("opd_live")\
+        .select("*")\
+        .eq("date", today)\
+        .execute()
+
+    rows = result.data
 
     total = len(rows)
     waiting = len([r for r in rows if r["status"] == "Waiting"])
@@ -358,21 +365,25 @@ def opd_doctor_panel(doctor_name):
 
     create_opd_table()
 
-    conn = get_connection()
-    cursor = conn.cursor()
+   
 
-    today = str(datetime.now().date())
+    today = str(date.today())
 
-    cursor.execute("SELECT * FROM opd_live WHERE date = ?", (today,))
-    all_rows = cursor.fetchall()
+    result_all = supabase.table("opd_live")\
+        .select("*")\
+        .eq("date", today)\
+        .execute()
 
-    rows = cursor.fetchall()
-    cursor.execute("""
-        SELECT * FROM opd_live
-        WHERE doctor = ? AND date = ?
-    """, (doctor_name, today))
+    all_rows = result_all.data
 
     rows = cursor.fetchall()
+    result_doc = supabase.table("opd_live")\
+        .select("*")\
+        .eq("doctor", doctor_name)\
+        .eq("date", today)\
+        .execute()
+
+    rows = result_doc.data
 
     # Row 1
     total_doctor = len(rows)
