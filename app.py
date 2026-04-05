@@ -1187,150 +1187,45 @@ if not st.session_state.splash_done:
 
 if st.session_state.page == "login":
 
-    # ===============================
-# 🔐 STEALTH ADMIN ACCESS
-# ===============================
+    st.title("Mahaveer Hospital Clinical AI")
 
-    ADMIN_PIN = "031215"   # 🔥 CHANGE THIS
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
-    if "logo_clicks" not in st.session_state:
-        st.session_state.logo_clicks = 0
+    if st.button("Login"):
 
-    if "admin_pin_mode" not in st.session_state:
-        st.session_state.admin_pin_mode = False
+        result = supabase.table("users")\
+            .select("*")\
+            .eq("username", username.strip())\
+            .eq("password", password.strip())\
+            .execute()
 
-    # Invisible click trigger (tiny blank button)
-    if st.button(" ", key="hidden_logo_click"):
-        st.session_state.logo_clicks += 1
+        user_match = result.data
 
-    # If clicked 5 times → open PIN mode
-    if st.session_state.logo_clicks >= 5:
-        st.session_state.admin_pin_mode = True
-        st.session_state.logo_clicks = 0
+        if len(user_match) > 0:
 
-    # Show PIN input only if secret mode activated
-    if st.session_state.admin_pin_mode:
+            role = user_match[0]["role"]
 
-        st.markdown("### 🔐 Admin PIN Required")
-
-        entered_pin = st.text_input(
-            "Enter Admin PIN",
-            type="password",
-            key="admin_pin_input"
-        )
-
-        if st.button("Verify PIN"):
-
-            if entered_pin == ADMIN_PIN:
-
-                st.session_state.user = "MASTER_ADMIN"
-                st.session_state.role = "Admin"
-                st.session_state.logged_in = True
-                st.session_state.page = "admin_dashboard"
-
-                st.session_state.admin_pin_mode = False
-
-                st.success("Admin Access Granted")
-                st.rerun()
-
-            else:
-                st.error("Incorrect PIN")
-
-
-
-    st.title("🔒 Hospital Clinical AI Login")
-
-
-    tab1, tab2 = st.tabs(["🔑 Login", "🆕 Sign Up"])
-
-    # ---------------- LOGIN TAB ----------------
-
-    with tab1:
-
-        username = st.text_input("Username", key="login_username")
-        password = st.text_input("Password", type="password", key="login_password")
-
-        # 🔐 Hidden Admin Access
-        secret_key = st.text_input(
-            "Enter Access Code (Admin Only)",
-            type="password",
-            key="admin_secret"
-        )
-
-        if secret_key == MASTER_ADMIN_SECRET:
-
-            st.session_state.user = "MASTER_ADMIN"
-            st.session_state.role = "Admin"
+            st.session_state.user = username
+            st.session_state.role = role
             st.session_state.logged_in = True
-            st.session_state.page = "admin_dashboard"
 
-            st.success("🔐 Super Admin Access Granted")
+            if role == "Doctor":
+                st.session_state.page = "doctor_dashboard"
+
+            elif role == "Nurse":
+                st.session_state.page = "nurse_dashboard"
+
+            elif role == "Technician":
+                st.session_state.page = "tech_dashboard"
+
+            elif role == "Reception":
+                st.session_state.page = "reception_dashboard"
+
             st.rerun()
 
-        if st.button("Login", key="login_btn"):
-
-            username_clean = username.strip()
-            password_clean = password.strip()
-
-            result = supabase.table("users")\
-                .select("*")\
-                .eq("username", username_clean)\
-                .eq("password", password_clean)\
-                .execute()
-
-            user_match = result.data
-
-            if len(user_match) > 0:
-
-                role = user_match[0]["role"]
-
-                st.session_state.user = username_clean
-                st.session_state.role = role
-                st.session_state.logged_in = True
-
-                if role == "Doctor":
-                    st.session_state.page = "doctor_dashboard"
-
-                elif role == "Nurse":
-                    st.session_state.page = "nurse_dashboard"
-
-                elif role == "Technician":
-                    st.session_state.page = "tech_dashboard"
-
-                elif role == "Reception":
-                    st.session_state.page = "reception_dashboard"
-
-                st.success(f"Welcome {username_clean}")
-                st.rerun()
-
-            else:
-                st.error("Invalid Credentials")    
-    
-
-            
-
-    # ---------------- SIGNUP TAB ----------------
-
-    with tab2:
-
-        new_user = st.text_input("Create Username", key="signup_username")
-        new_pass = st.text_input("Create Password", type="password", key="signup_password")
-        role = st.selectbox("Role", ["Doctor", "Nurse", "Technician", "Reception"], key="signup_role")
-
-        if st.button("Create Account", key="signup_btn"):
-
-            if new_user.strip() == "" or new_pass.strip() == "":
-                st.error("All fields required 😎")
-            else:
-
-                df_users = load_users()
-
-                if new_user.strip() in df_users["Username"].astype(str).str.strip().values:
-                    st.error("⚠ Username already exists 🚨")
-                else:
-
-                    save_user(new_user, new_pass, role)
-                    st.success("✅ Account Created Successfully 😎🔥")
+        else:
+            st.error("Invalid username or password")
 
 if st.session_state.get("logged_in"):
 
@@ -4995,144 +4890,50 @@ if not st.session_state.splash_done:
 # =========================================================
 
 # =========================================================
-# LOGIN PAGE
+# SIMPLE LOGIN PAGE
 # =========================================================
 
 if st.session_state.page == "login":
 
-    # ===============================
-# 🔐 STEALTH ADMIN ACCESS
-# ===============================
+    st.title("Mahaveer Hospital Clinical AI")
 
-    ADMIN_PIN = "031215"   # 🔥 CHANGE THIS
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
-    if "logo_clicks" not in st.session_state:
-        st.session_state.logo_clicks = 0
+    if st.button("Login"):
 
-    if "admin_pin_mode" not in st.session_state:
-        st.session_state.admin_pin_mode = False
+        result = supabase.table("users")\
+            .select("*")\
+            .eq("username", username.strip())\
+            .eq("password", password.strip())\
+            .execute()
 
-    # Invisible click trigger (tiny blank button)
-    if st.button(" ", key="hidden_logo_click_stealth"):
-        st.session_state.logo_clicks += 1
+        user_match = result.data
 
-    # If clicked 5 times → open PIN mode
-    if st.session_state.logo_clicks >= 5:
-        st.session_state.admin_pin_mode = True
-        st.session_state.logo_clicks = 0
+        if len(user_match) > 0:
 
-    # Show PIN input only if secret mode activated
-    if st.session_state.admin_pin_mode:
+            role = user_match[0]["role"]
 
-        st.markdown("### 🔐 Admin PIN Required")
-
-        entered_pin = st.text_input(
-            "Enter Admin PIN",
-            type="password",
-            key="admin_pin_input"
-        )
-
-        if st.button("Verify PIN"):
-
-            if entered_pin == ADMIN_PIN:
-
-                st.session_state.user = "MASTER_ADMIN"
-                st.session_state.role = "Admin"
-                st.session_state.logged_in = True
-                st.session_state.page = "admin_dashboard"
-
-                st.session_state.admin_pin_mode = False
-
-                st.success("Admin Access Granted")
-                st.rerun()
-
-            else:
-                st.error("Incorrect PIN")
-
-
-
-    st.title("🔒 Hospital Clinical AI Login")
-
-
-    
-
-        if secret_key == MASTER_ADMIN_SECRET:
-
-            st.session_state.user = "MASTER_ADMIN"
-            st.session_state.role = "Admin"
+            st.session_state.user = username
+            st.session_state.role = role
             st.session_state.logged_in = True
-            st.session_state.page = "admin_dashboard"
 
-            st.success("🔐 Super Admin Access Granted")
+            if role == "Doctor":
+                st.session_state.page = "doctor_dashboard"
+
+            elif role == "Nurse":
+                st.session_state.page = "nurse_dashboard"
+
+            elif role == "Reception":
+                st.session_state.page = "reception_dashboard"
+
+            elif role == "Technician":
+                st.session_state.page = "tech_dashboard"
+
             st.rerun()
 
-        if st.button("Login", key="login_btn"):
-
-            username_clean = username.strip()
-            password_clean = password.strip()
-
-            result = supabase.table("users")\
-                .select("*")\
-                .eq("username", username_clean)\
-                .eq("password", password_clean)\
-                .execute()
-
-            user_match = result.data
-
-            if len(user_match) > 0:
-
-                role = user_match[0]["role"]
-
-                st.session_state.user = username_clean
-                st.session_state.role = role
-                st.session_state.logged_in = True
-
-                if role == "Doctor":
-                    st.session_state.page = "doctor_dashboard"
-
-                elif role == "Nurse":
-                    st.session_state.page = "nurse_dashboard"
-
-                elif role == "Technician":
-                    st.session_state.page = "tech_dashboard"
-
-                elif role == "Reception":
-                    st.session_state.page = "reception_dashboard"
-
-                st.success(f"Welcome {username_clean}")
-                st.rerun()
-
-            else:
-                st.error("Invalid Credentials")    
-    
-
-            
-
-    # ---------------- SIGNUP TAB ----------------
-
-    with tab2:
-
-        new_user = st.text_input("Create Username", key="signup_username")
-        new_pass = st.text_input("Create Password", type="password", key="signup_password")
-        role = st.selectbox("Role", ["Doctor", "Nurse", "Technician", "Reception"], key="signup_role")
-
-        if st.button("Create Account", key="signup_btn"):
-
-            if new_user.strip() == "" or new_pass.strip() == "":
-                st.error("All fields required 😎")
-            else:
-
-                df_users = load_users()
-
-                if new_user.strip() in df_users["Username"].astype(str).str.strip().values:
-                    st.error("⚠ Username already exists 🚨")
-                else:
-
-                    save_user(new_user, new_pass, role)
-                    st.success("✅ Account Created Successfully 😎🔥")
-
-if st.session_state.get("logged_in"):
-
+        else:
+            st.error("Invalid username or password")
     import threading
     from sync_his_to_opd_live import sync_data
 
