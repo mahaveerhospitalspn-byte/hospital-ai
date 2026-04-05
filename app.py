@@ -2152,7 +2152,7 @@ elif st.session_state.page == "live_opd":
 elif st.session_state.page == "doctor_opd":
 
     # 🔙 Back Button at Top
-    if st.button("↩ Back to Doctor Dashboard"):
+    if st.button("↩ Back to Doctor Dashboard", key="back_doc_dashboard"):
         st.session_state.page = "doctor_dashboard"
         st.rerun()
 
@@ -5961,7 +5961,7 @@ elif st.session_state.page == "live_opd":
 elif st.session_state.page == "doctor_opd":
 
     # 🔙 Back Button at Top
-    if st.button("↩ Back to Doctor Dashboard"):
+    if st.button("↩ Back to Doctor Dashboard", key="back_doc_dashboard"):
         st.session_state.page = "doctor_dashboard"
         st.rerun()
 
