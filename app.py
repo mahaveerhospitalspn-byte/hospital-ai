@@ -1189,8 +1189,8 @@ if st.session_state.page == "login":
 
     st.title("Mahaveer Hospital Clinical AI")
 
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+    username = st.text_input("Username", key="login_user_main")
+    password = st.text_input("Password", type="password", key="login_pass_main")
 
     if st.button("Login"):
 
