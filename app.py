@@ -5054,21 +5054,7 @@ if st.session_state.page == "login":
     st.title("🔒 Hospital Clinical AI Login")
 
 
-    tab1, tab2 = st.tabs(["🔑 Login", "🆕 Sign Up"])
-
-    # ---------------- LOGIN TAB ----------------
-
-    with tab1:
-
-        username = st.text_input("Username", key="login_username")
-        password = st.text_input("Password", type="password", key="login_password")
-
-        # 🔐 Hidden Admin Access
-        secret_key = st.text_input(
-            "Enter Access Code (Admin Only)",
-            type="password",
-            key="admin_secret"
-        )
+    
 
         if secret_key == MASTER_ADMIN_SECRET:
 
