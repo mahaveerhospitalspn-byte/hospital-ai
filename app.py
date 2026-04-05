@@ -5011,7 +5011,7 @@ if st.session_state.page == "login":
         st.session_state.admin_pin_mode = False
 
     # Invisible click trigger (tiny blank button)
-    if st.button(" ", key="hidden_logo_click"):
+    if st.button(" ", key="hidden_logo_click_stealth"):
         st.session_state.logo_clicks += 1
 
     # If clicked 5 times → open PIN mode
