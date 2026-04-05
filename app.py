@@ -1163,7 +1163,9 @@ if not st.session_state.splash_done:
     st.markdown(
         """
         <div class="center-text">
-        Mahaveer Hospital & Dental Care Pvt Ltd
+        Mahaveer Hospital 
+        & Dental Care 
+        Pvt Ltd
         </div>
         """,
         unsafe_allow_html=True
