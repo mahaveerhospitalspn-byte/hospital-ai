@@ -2047,7 +2047,7 @@ elif st.session_state.page == "live_opd":
 elif st.session_state.page == "doctor_opd":
 
     # 🔙 Back Button at Top
-    if st.button("↩ Back to Doctor Dashboard", key="back_doc_dashboard"):
+    if st.button("↩ Back to Doctor Dashboard", key="back_doc_dashboard_doctor"):
         st.session_state.page = "doctor_dashboard"
         st.rerun()
 
@@ -3719,7 +3719,7 @@ elif st.session_state.page == "online_appointments":
 
     st.title("🌐 Online Appointments")
 
-    conn = sqlite3.connect(r"C:\Users\admin\Desktop\Hospital_AI\hospital.db")
+    conn = sqlite3.connect("hospital.db")
 
     df = pd.read_sql_query(
     """
@@ -3889,8 +3889,29 @@ st.set_page_config(
     page_icon="🏥",
     layout="wide"
 )
+st.set_page_config(
+    page_title="Mahaveer Hospital Clinical AI",
+    page_icon="🏥",
+    layout="wide"
+)
 
+# ===============================
+# CHECK DATABASE TABLES
+# ===============================
 
+import sqlite3
+
+conn = sqlite3.connect("hospital.db")
+
+cursor = conn.cursor()
+
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+
+tables = cursor.fetchall()
+
+st.write("Tables in hospital.db:", tables)
+
+conn.close()
 def ensure_patient_registry():
 
     registry = "Patients_Data.csv"
@@ -5748,7 +5769,7 @@ elif st.session_state.page == "live_opd":
 elif st.session_state.page == "doctor_opd":
 
     # 🔙 Back Button at Top
-    if st.button("↩ Back to Doctor Dashboard", key="back_doc_dashboard"):
+    if st.button("↩ Back to Doctor Dashboard", key="back_doc_dashboard_2"):
         st.session_state.page = "doctor_dashboard"
         st.rerun()
 
