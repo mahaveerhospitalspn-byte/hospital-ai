@@ -1139,28 +1139,37 @@ def generate_ai_ot_note_v2(patient_name, diagnosis, surgery_type, findings):
 # =========================================================
 # SPLASH SCREEN
 # =========================================================
+# =========================================================
+# SPLASH SCREEN (NO LOGO)
+# =========================================================
+
 if not st.session_state.splash_done:
 
+    st.markdown("""
+    <style>
+    .center-text {
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:80vh;
+        font-size:42px;
+        font-weight:bold;
+        color:#1565C0;
+        text-align:center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.markdown(
-        "<div style='text-align: center; padding-top: 80px;'>",
+        """
+        <div class="center-text">
+        Mahaveer Hospital & Dental Care Pvt Ltd
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
-    st.image("logo.png", width=150)
-
-    st.markdown(
-        "<h2 style='margin-bottom: 0;'>Mahaveer Hospital</h2>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        "<p style='color: grey;'>Hospital Clinical AI System</p>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    time.sleep(4)
+    time.sleep(3)
 
     st.session_state.splash_done = True
     st.session_state.page = "login"
