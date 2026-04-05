@@ -1230,7 +1230,7 @@ if st.session_state.page == "login":
 if st.session_state.get("logged_in"):
 
     import threading
-    from sync_his_to_opd_live import sync_data
+    
 
     def background_sync():
         while True:
