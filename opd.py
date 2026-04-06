@@ -341,7 +341,7 @@ def opd_doctor_panel(doctor_name):
 
         st.success("All waiting patients marked as Consulted")
 
-        st.rerun())
+        st.rerun()
 
        
 
