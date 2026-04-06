@@ -15,7 +15,7 @@ from datetime import date
 
 
 from datetime import date
-from app import supabase
+from supabase_client import supabase
 
 
 @st.cache_data(ttl=10)
@@ -301,7 +301,7 @@ def opd_doctor_panel(doctor_name):
                     .eq("id", r["id"])\
                     .execute()
 
-                 
+                    st.rerun())
 
                     st.session_state.open_doc_id = None
                     st.rerun()
@@ -341,7 +341,9 @@ def opd_doctor_panel(doctor_name):
 
         st.success("All waiting patients marked as Consulted")
 
-        st.rerun()
+        st.rerun())
+
+       
 
 
 

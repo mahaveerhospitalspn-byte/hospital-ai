@@ -21,11 +21,11 @@ import time
 import sqlite3
 from opd_documentation import create_drug_master, import_large_drug_dataset
 
-from supabase import create_client
+
+from supabase_client import supabase
 
 
-import os
-from supabase import create_client
+
 
 SUPABASE_URL = "https://ptkdegqftfcaqrvsbihk.supabase.co"
 
@@ -3762,11 +3762,11 @@ import time
 import sqlite3
 from opd_documentation import create_drug_master, import_large_drug_dataset
 
-from supabase import create_client
 
 
-import os
-from supabase import create_client
+
+
+
 
 SUPABASE_URL = "https://ptkdegqftfcaqrvsbihk.supabase.co"
 
