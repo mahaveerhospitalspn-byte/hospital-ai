@@ -301,7 +301,7 @@ def opd_doctor_panel(doctor_name):
                     .eq("id", r["id"])\
                     .execute()
 
-                    st.rerun())
+                    st.rerun()
 
                     st.session_state.open_doc_id = None
                     st.rerun()
