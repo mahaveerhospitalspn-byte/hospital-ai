@@ -131,7 +131,7 @@ def opd_doctor_panel(doctor_name):
     for r in rows:
 
         queue = r["name"] if r["status"] == "Waiting" else ""
-        consulted_name = r["name"] if r["status"] == "Consulted"] else ""
+        consulted_name = r["name"] if r["status"] == "Consulted" else ""
 
         table_data.append({
 
