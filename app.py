@@ -1638,27 +1638,20 @@ elif st.session_state.page == "search":
     # ------------------------
     # SEARCH OPD (SQL)
     # ------------------------
-        conn = sqlite3.connect("hospital.db")
-        cursor = conn.cursor()
+        result = supabase.table("opd_live")\
+            .select("name,uhid,date")\
+            .ilike("name", f"%{search}%")\
+            .limit(20)\
+            .execute()
 
-        cursor.execute("""
-            SELECT name, uhid, date
-            FROM opd_live
-            WHERE name LIKE ? OR uhid LIKE ?
-            ORDER BY date DESC
-            LIMIT 20
-        """, (f"%{search}%", f"%{search}%"))
-
-        for r in cursor.fetchall():
+        for r in result.data:
 
             results.append({
-                "name": r[0],
-                "uhid": str(r[1]),
-                "date": str(r[2]),
+                "name": r["name"],
+                "uhid": str(r["uhid"]),
+                "date": str(r["date"]),
                 "type": "OPD"
             })
-
-        conn.close()
 
     # ------------------------
     # SEARCH IPD (CSV)
@@ -3765,7 +3758,7 @@ from opd import opd_reception_panel, opd_doctor_panel
 from ot_ai_app import ot_module
 import threading
 import time
-#from sync_his_to_opd_live import sync_data
+
 import sqlite3
 from opd_documentation import create_drug_master, import_large_drug_dataset
 
