@@ -25,12 +25,7 @@ from opd_documentation import create_drug_master, import_large_drug_dataset
 from supabase_client import supabase
 
 
-from supabase import create_client
 
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 
@@ -1194,7 +1189,7 @@ if st.session_state.page == "login":
     username = st.text_input("Username", key="login_user_main")
     password = st.text_input("Password", type="password", key="login_pass_main")
 
-    if st.button("Login"):
+    if st.button("Login", key="login_btn"):
 
         result = supabase.table("users")\
             .select("*")\
@@ -4916,7 +4911,7 @@ if st.session_state.page == "login":
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
-    if st.button("Login"):
+    if st.button("Login", key="login_btn"):
 
         result = supabase.table("users")\
             .select("*")\
