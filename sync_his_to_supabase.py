@@ -41,7 +41,7 @@ def sync():
 
     ORDER BY o.id DESC
 
-    """))
+    """)
 
     rows = cursor.fetchall()
 

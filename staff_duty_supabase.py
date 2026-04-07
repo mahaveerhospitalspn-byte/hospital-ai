@@ -4,6 +4,7 @@ from datetime import date
 
 # ---------------- SUPABASE ----------------
 
+# Requires .streamlit/secrets.toml with SUPABASE_URL and SUPABASE_KEY
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
