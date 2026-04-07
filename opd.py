@@ -255,7 +255,7 @@ def opd_doctor_panel(doctor_name):
     # -------------------------------
     st.markdown("---")
 
-    if st.button("End OPD - Mark All Waiting Consulted"):
+    if st.button("End OPD - Mark All Waiting Consulted", key="end_opd_btn"):
 
         today = str(date.today())
 
