@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 
 import streamlit as st
 import os
@@ -18,7 +18,7 @@ from opd import opd_reception_panel, opd_doctor_panel
 from ot_ai_app import ot_module
 import threading
 import time
-#from sync_his_to_opd_live import sync_data
+
 import sqlite3
 from opd_documentation import create_drug_master, import_large_drug_dataset
 
@@ -1231,12 +1231,12 @@ if st.session_state.page == "login":
 if st.session_state.get("logged_in"):
 
     import threading
-    from sync_his_to_opd_live import sync_data
+    from sync_his_to_supabase import sync
 
     def background_sync():
         while True:
             try:
-                sync_data()
+                sync()
                 time.sleep(5)
             except:
                 time.sleep(5)
@@ -2710,11 +2710,9 @@ elif st.session_state.page == "medication":
         st.session_state.page="patient_dashboard"
         st.rerun()
 
-    st.markdown("---")
+ 
 
-    if st.button("⬅ Back"):
-        st.session_state.page = "patient_dashboard"
-        st.rerun()
+    
 
 
 
@@ -2847,7 +2845,7 @@ elif st.session_state.page == "edit_medication":
 
         st.success("Medication history updated")
         st.rerun()
-    if st.button("⬅ Back"):
+    if st.button("⬅ Back", key="med_back1"):
 
         st.session_state.page = "medication"
         st.rerun()
@@ -6312,7 +6310,7 @@ elif st.session_state.page == "medication":
     if col2.button("➕ Add Additional Order"):
 
         new_row = {
-            "Date": today,
+            "Date": date_str,
             "Time": now_time,
             "Doctor": st.session_state.user,
             "Orders": order_text
@@ -7465,7 +7463,7 @@ elif st.session_state.page == "online_appointments":
         
 
 
-=======
+
 
 import streamlit as st
 import os
@@ -7485,7 +7483,7 @@ from opd import opd_reception_panel, opd_doctor_panel
 from ot_ai_app import ot_module
 import threading
 import time
-#from sync_his_to_opd_live import sync_data
+
 import sqlite3
 from opd_documentation import create_drug_master, import_large_drug_dataset
 
@@ -14928,6 +14926,4 @@ elif st.session_state.page == "online_appointments":
 
         
 
-
->>>>>>> f0c78b8 (auto update)
     
