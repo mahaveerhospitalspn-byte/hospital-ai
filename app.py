@@ -25,6 +25,22 @@ from opd_documentation import create_drug_master, import_large_drug_dataset
 
 
 from supabase import create_client
+from supabase_storage import (
+    register_patient_sb, load_patient_info_sb, load_patient_name_sb,
+    load_patient_status_sb, discharge_patient_sb, reverse_discharge_sb,
+    get_admitted_patients_sb, patient_exists_sb, load_patient_registry_sb,
+    save_vitals_sb, load_vitals_sb, vitals_done_today_sb,
+    save_medication_sb, load_medications_sb, meds_done_today_sb,
+    save_nursing_note_sb, load_nursing_notes_sb,
+    save_ot_note_sb, load_ot_note_sb, ot_done_sb,
+    save_diagnosis_sb, load_latest_diagnosis_sb,
+    save_ot_register_sb, load_ot_register_sb,
+    save_daycare_sb, load_daycare_register_sb,
+    save_blood_product_sb, load_blood_products_sb,
+    log_audit_sb, add_notification_sb, get_unseen_notifications_sb,
+    request_summary_approval_sb, check_summary_status_sb, approve_summary_sb,
+    load_users_sb, approve_user_sb, save_user_sb,
+)
 from streamlit_autorefresh import st_autorefresh
 
 
@@ -68,12 +84,6 @@ if "user" not in st.session_state:
     st.session_state.user = ""
 
 
-@st.cache_resource(show_spinner=False)
-def _rebuild_once():
-    rebuild_registry_from_records()
-    rebuild_daycare_register()
-
-_rebuild_once()
 
 
 def rebuild_registry_from_records():
@@ -262,6 +272,15 @@ def rebuild_daycare_register():
         df.to_csv(DAYCARE_REGISTER_FILE, index=False)
 
 
+@st.cache_resource(show_spinner=False)
+def _rebuild_once():
+    """Runs exactly once per server start — never on reruns."""
+    rebuild_registry_from_records()
+    rebuild_daycare_register()
+
+_rebuild_once()
+
+
 def save_ot_register_entry(date, patient_name, uhid, diagnosis, surgery, implant, nail_size, plate_type, holes, surgeon):
 
     entry = {
@@ -308,23 +327,14 @@ USER_DB = "users.csv"
 
 @st.cache_data(ttl=30, show_spinner=False)
 def load_users():
-    if os.path.exists(USER_DB):
-        return pd.read_csv(USER_DB)
-    else:
-        df = pd.DataFrame(columns=["Username", "Password", "Role", "Status"])
-        df.to_csv(USER_DB, index=False)
-        return df
+    import pandas as pd
+    data = load_users_sb()
+    if data:
+        return pd.DataFrame(data)
+    return pd.DataFrame(columns=["username", "password", "role", "status"])
 
 def save_user(username, password, role):
-
-    data = {
-        "username": username.strip(),
-        "password": password.strip(),
-        "role": role,
-        "status": "Pending"
-    }
-
-    supabase.table("users").insert(data).execute()
+    save_user_sb(username, password, role)
 
 MASTER_ADMIN_SECRET = "Attitude@83"
 
@@ -334,13 +344,7 @@ MASTER_ADMIN_SECRET = "Attitude@83"
 
 @st.cache_data(ttl=60, show_spinner=False)
 def load_patient_name(uhid):
-    file_path = f"Records/{uhid}/Patient_Info.txt"
-    if os.path.exists(file_path):
-        with open(file_path, "r") as f:
-            for line in f.readlines():
-                if "Patient Name:" in line:
-                    return line.replace("Patient Name:", "").strip()
-    return uhid
+    return load_patient_name_sb(uhid)
 @st.cache_data(ttl=300, show_spinner=False)
 def load_admit_date(uhid):
 
@@ -360,7 +364,7 @@ def load_admit_date(uhid):
 
 @st.cache_data(ttl=30, show_spinner=False)
 def patient_exists(uhid):
-    return os.path.exists(f"Records/{uhid}/Patient_Info.txt")
+    return patient_exists_sb(uhid)
 
 
 
@@ -389,13 +393,7 @@ def register_patient(uhid, patient_name, diagnosis, admitted_on):
     print("✅ PATIENT SAVED:", uhid)
 
     
-    supabase.table("patients").upsert({
-
-        "uhid": str(uhid),
-        "name": patient_name,
-        "diagnosis": diagnosis
-
-    }).execute()
+    register_patient_sb(uhid, patient_name, diagnosis, admitted_on)
 
 
 def get_patient_list():
@@ -735,22 +733,7 @@ def load_discharge_status(uhid):
 
 @st.cache_data(ttl=10, show_spinner=False)
 def load_patient_status(uhid):
-
-    registry = "Patients_Data.csv"
-
-    ensure_patient_registry()
-
-    df = pd.read_csv(registry, on_bad_lines='skip')
-
-    df["UHID"] = df["UHID"].astype(str).str.strip()
-    df["Status"] = df["Status"].astype(str).str.strip()
-
-    row = df[df["UHID"] == str(uhid).strip()]
-
-    if not row.empty:
-        return row.iloc[0]["Status"]
-
-    return "Unknown"
+    return load_patient_status_sb(uhid)
 
 
 def discharge_patient(uhid):
@@ -870,88 +853,21 @@ SUMMARY_APPROVAL_FILE = "summary_approvals.csv"
 
 
 def add_notification(message, user="", patient=""):
-
-    entry = {
-        "Time": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
-        "Message": message,
-        "User": user,
-        "Patient": patient
-    }
-
-    file_exists = os.path.exists(NOTIFICATION_FILE)
-
-    with open(NOTIFICATION_FILE, "a", newline="", encoding="utf-8") as f:
-
-        writer = csv.DictWriter(f, fieldnames=entry.keys())
-
-        if not file_exists:
-            writer.writeheader()
-
-        writer.writerow(entry)
+    add_notification_sb(message, user=user, patient=patient)
 
 def log_audit(action, user="", patient="", details=""):
-
-    entry = {
-        "Time": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
-        "User": user,
-        "Patient": patient,
-        "Action": action,
-        "Details": details
-    }
-
-    file_exists = os.path.exists(AUDIT_FILE)
-
-    with open(AUDIT_FILE, "a", newline="", encoding="utf-8") as f:
-
-        writer = csv.DictWriter(f, fieldnames=entry.keys())
-
-        if not file_exists:
-            writer.writeheader()
-
-        writer.writerow(entry)
+    log_audit_sb(action, user=user, patient=patient, details=details)
 
 def request_summary_approval(uhid, requested_by):
-
-    entry = {
-        "UHID": uhid,
-        "Requested_By": requested_by,
-        "Status": "Pending"
-    }
-
-    file_exists = os.path.exists(SUMMARY_APPROVAL_FILE)
-
-    with open(SUMMARY_APPROVAL_FILE, "a", newline="") as f:
-
-        writer = csv.DictWriter(f, fieldnames=entry.keys())
-
-        if not file_exists:
-            writer.writeheader()
-
-        writer.writerow(entry)
+    request_summary_approval_sb(uhid, requested_by)
 
 
 def check_summary_status(uhid):
-
-    if not os.path.exists(SUMMARY_APPROVAL_FILE):
-        return None
-
-    df = pd.read_csv(SUMMARY_APPROVAL_FILE)
-
-    row = df[df["UHID"] == uhid]
-
-    if not row.empty:
-        return row.iloc[-1]["Status"]
-
-    return None
+    return check_summary_status_sb(uhid)
 
 
 def approve_summary(uhid):
-
-    df = pd.read_csv(SUMMARY_APPROVAL_FILE)
-
-    df.loc[df["UHID"] == uhid, "Status"] = "Approved"
-
-    df.to_csv(SUMMARY_APPROVAL_FILE, index=False)
+    approve_summary_sb(uhid)
 
 
 # =========================================================
@@ -969,10 +885,7 @@ style = styles['BodyText']
 HOSPITAL_NAME = "MAHAVEER HOSPITAL & DENTAL CARE PRIVATE LIMITED"
 
 def ot_done(uhid):
-
-    ot_file = f"Records/{uhid}/OT_Note.txt"
-
-    return os.path.exists(ot_file)
+    return ot_done_sb(uhid)
 
 def add_watermark(c, doc):
     c.saveState()
@@ -1042,19 +955,7 @@ def show_pdf_preview(pdf_path):
 
 @st.cache_data(ttl=60, show_spinner=False)
 def load_latest_diagnosis(uhid):
-
-    info_file = f"Records/{uhid}/Patient_Info.txt"
-
-    if os.path.exists(info_file):
-
-        with open(info_file, "r", encoding="utf-8") as f:
-
-            for line in f.readlines():
-
-                if "Diagnosis:" in line:
-                    return line.replace("Diagnosis:", "").strip()
-
-    return "General Case"
+    return load_latest_diagnosis_sb(uhid)
 
 
 def predict_vitals(diagnosis):
