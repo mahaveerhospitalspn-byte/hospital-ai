@@ -1070,60 +1070,156 @@ if st.session_state.page == "login":
 
     st.markdown("""
     <style>
-    .login-wrap {
-        max-width: 400px;
-        margin: 60px auto;
-        padding: 2.5rem 2rem;
-        background: #f8f9fa;
-        border-radius: 14px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    [data-testid="stAppViewContainer"] { background: #f0f4f8; }
+    .hosp-header {
+        text-align: center;
+        padding: 2rem 0 1rem 0;
     }
-    .login-title { text-align:center; color:#1565C0; font-size:24px; font-weight:700; margin-bottom:4px; }
-    .login-sub   { text-align:center; color:#888; font-size:13px; margin-bottom:1.5rem; }
+    .hosp-header h1 {
+        color: #1565C0;
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+    }
+    .hosp-header p {
+        color: #666;
+        font-size: 0.95rem;
+        margin: 4px 0 0 0;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    .stTabs [data-baseweb="tab"] {
+        flex: 1;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.75rem;
+        background: transparent;
+        border: none;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #1565C0 !important;
+        border-bottom: 3px solid #1565C0 !important;
+    }
     </style>
-    <div class="login-wrap">
-      <div class="login-title">🏥 Mahaveer Hospital</div>
-      <div class="login-sub">Clinical Management System</div>
+    <div class="hosp-header">
+        <h1>🏥 Mahaveer Hospital</h1>
+        <p>Clinical Management System</p>
     </div>
     """, unsafe_allow_html=True)
 
+    # ── Ensure default admin exists ──────────────────────────────────────────
+    @st.cache_resource(show_spinner=False)
+    def _ensure_default_admin():
+        try:
+            r = supabase.table("users").select("username") \
+                .eq("username", "admin").execute()
+            if not r.data:
+                supabase.table("users").insert({
+                    "username": "admin",
+                    "password": "Admin@Hospital1",
+                    "role":     "Admin",
+                    "status":   "Approved"
+                }).execute()
+        except Exception:
+            pass
+    _ensure_default_admin()
+
     _, col, _ = st.columns([1, 2, 1])
     with col:
-        username = st.text_input("Username", placeholder="Enter username", key="login_user")
-        password = st.text_input("Password", type="password", placeholder="Enter password", key="login_pass")
+        tab_login, tab_signup = st.tabs(["🔐  Login", "📝  Sign Up"])
 
-        if st.button("🔐 Login", use_container_width=True, key="login_btn"):
-            if not username.strip() or not password.strip():
-                st.warning("Please enter both username and password.")
-            else:
-                try:
-                    result = supabase.table("users") \
-                        .select("*") \
-                        .eq("username", username.strip()) \
-                        .eq("password", password.strip()) \
-                        .execute()
-                    matches = result.data
-                    if matches:
-                        user = matches[0]
-                        if user.get("status", "Approved") != "Approved":
-                            st.error("⏳ Account pending approval. Contact Admin.")
+        # ── LOGIN TAB ────────────────────────────────────────────────────────
+        with tab_login:
+            st.markdown("<br>", unsafe_allow_html=True)
+            l_user = st.text_input("Username", placeholder="Enter username", key="l_user")
+            l_pass = st.text_input("Password", type="password", placeholder="Enter password", key="l_pass")
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            if st.button("🔐  Login", use_container_width=True, key="login_btn"):
+                if not l_user.strip() or not l_pass.strip():
+                    st.warning("Please enter both username and password.")
+                else:
+                    try:
+                        result = supabase.table("users") \
+                            .select("*") \
+                            .eq("username", l_user.strip()) \
+                            .eq("password", l_pass.strip()) \
+                            .execute()
+                        matches = result.data
+                        if matches:
+                            user = matches[0]
+                            if user.get("status", "Approved") != "Approved":
+                                st.error("⏳ Account pending Admin approval.")
+                            else:
+                                role = user["role"]
+                                st.session_state.user      = l_user.strip()
+                                st.session_state.role      = role
+                                st.session_state.logged_in = True
+                                st.session_state.page = {
+                                    "Doctor":     "doctor_dashboard",
+                                    "Nurse":      "nurse_dashboard",
+                                    "Technician": "tech_dashboard",
+                                    "Reception":  "reception_dashboard",
+                                    "Admin":      "admin_dashboard",
+                                }.get(role, "doctor_dashboard")
+                                st.rerun()
                         else:
-                            role = user["role"]
-                            st.session_state.user     = username.strip()
-                            st.session_state.role     = role
-                            st.session_state.logged_in = True
-                            st.session_state.page = {
-                                "Doctor":     "doctor_dashboard",
-                                "Nurse":      "nurse_dashboard",
-                                "Technician": "tech_dashboard",
-                                "Reception":  "reception_dashboard",
-                                "Admin":      "admin_dashboard",
-                            }.get(role, "doctor_dashboard")
-                            st.rerun()
-                    else:
-                        st.error("❌ Invalid username or password.")
-                except Exception as e:
-                    st.error(f"Connection error: {e}")
+                            st.error("❌ Invalid username or password.")
+                    except Exception as e:
+                        st.error(f"Connection error: {e}")
+
+            st.markdown("---")
+            st.caption("🔑 Default Admin — username: `admin`  password: `Admin@Hospital1`")
+
+        # ── SIGN UP TAB ──────────────────────────────────────────────────────
+        with tab_signup:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.info("New accounts require Admin approval before you can log in.")
+
+            s_name = st.text_input("Full Name", placeholder="Dr. / Staff name", key="s_name")
+            s_user = st.text_input("Username", placeholder="Choose a username", key="s_user")
+            s_pass = st.text_input("Password", type="password",
+                                   placeholder="Min 6 characters", key="s_pass")
+            s_pass2 = st.text_input("Confirm Password", type="password",
+                                    placeholder="Repeat password", key="s_pass2")
+            s_role = st.selectbox("Role",
+                ["Doctor", "Nurse", "Technician", "Reception"],
+                key="s_role")
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            if st.button("📝  Request Account", use_container_width=True, key="signup_btn"):
+                if not s_user.strip() or not s_pass.strip() or not s_name.strip():
+                    st.warning("Please fill in all fields.")
+                elif len(s_pass) < 6:
+                    st.warning("Password must be at least 6 characters.")
+                elif s_pass != s_pass2:
+                    st.error("Passwords do not match.")
+                else:
+                    try:
+                        # Check username not taken
+                        existing = supabase.table("users") \
+                            .select("username") \
+                            .eq("username", s_user.strip()) \
+                            .execute()
+                        if existing.data:
+                            st.error("❌ Username already exists. Choose another.")
+                        else:
+                            supabase.table("users").insert({
+                                "username": s_user.strip(),
+                                "password": s_pass.strip(),
+                                "role":     s_role,
+                                "status":   "Pending",
+                                "name":     s_name.strip(),
+                            }).execute()
+                            st.success(
+                                f"✅ Account requested for **{s_name}** ({s_role}). "
+                                "Please wait for Admin approval."
+                            )
+                    except Exception as e:
+                        st.error(f"Error: {e}")
 
 # ── Background HIS sync ───────────────────────────────────────────────────────
 if st.session_state.get("logged_in") and "sync_started" not in st.session_state:
@@ -3439,34 +3535,123 @@ elif st.session_state.page == "admin_dashboard":
         st.session_state.show_user_mgmt = False
 
     if st.button("👥 User Management"):
-
         st.session_state.show_user_mgmt = not st.session_state.show_user_mgmt
 
     if st.session_state.show_user_mgmt:
+        st.markdown("---")
+        st.subheader("👥 User Management")
+
+        try:
+            all_users = supabase.table("users").select("*").order("status").execute().data or []
+        except Exception as e:
+            st.error(f"Could not load users: {e}")
+            all_users = []
+
+        pending  = [u for u in all_users if u.get("status") == "Pending"]
+        approved = [u for u in all_users if u.get("status") == "Approved"]
+
+        # ── Pending Approvals ────────────────────────────────────────────────
+        if pending:
+            st.markdown(f"#### ⏳ Pending Approval ({len(pending)})")
+            for u in pending:
+                c1, c2, c3 = st.columns([3, 1, 1])
+                c1.markdown(f"**{u['username']}** — {u['role']}"
+                            + (f" *(name: {u.get('name','')})*" if u.get('name') else ""))
+                if c2.button("✅ Approve", key=f"appr_{u['username']}"):
+                    supabase.table("users").update({"status": "Approved"}) \
+                        .eq("username", u["username"]).execute()
+                    load_users.clear()
+                    st.success(f"Approved: {u['username']}")
+                    st.rerun()
+                if c3.button("❌ Reject", key=f"rej_{u['username']}"):
+                    supabase.table("users").delete() \
+                        .eq("username", u["username"]).execute()
+                    load_users.clear()
+                    st.warning(f"Rejected & removed: {u['username']}")
+                    st.rerun()
+        else:
+            st.success("✅ No pending approvals")
 
         st.markdown("---")
-        st.subheader("👥 User Management Panel")
 
-        df_users = load_users()
+        # ── Active Users ─────────────────────────────────────────────────────
+        st.markdown(f"#### 👥 Active Users ({len(approved)})")
 
-        st.dataframe(df_users, use_container_width=True)
-
-        for index, row in df_users.iterrows():
-
-            col1, col2 = st.columns([4,1])
-
-            with col1:
-                st.write(f"{row['Username']} | {row['Role']} | {row['Status']}")
-
-            with col2:
-                if row["Status"] != "Approved":
-                    if st.button("Approve", key=f"admin_approve_{index}"):
-
-                        df_users.loc[index, "Status"] = "Approved"
-                        df_users.to_csv(USER_DB, index=False)
-
-                        st.success("User Approved")
+        # Add new user manually
+        with st.expander("➕ Add User Manually"):
+            nc1, nc2 = st.columns(2)
+            new_uname  = nc1.text_input("Username", key="new_uname")
+            new_upass  = nc2.text_input("Password", key="new_upass")
+            nc3, nc4   = st.columns(2)
+            new_name   = nc3.text_input("Full Name", key="new_name")
+            new_role   = nc4.selectbox("Role",
+                ["Doctor","Nurse","Technician","Reception","Admin"],
+                key="new_role")
+            if st.button("➕ Add User", key="add_user_btn"):
+                if new_uname and new_upass:
+                    try:
+                        supabase.table("users").insert({
+                            "username": new_uname.strip(),
+                            "password": new_upass.strip(),
+                            "name":     new_name.strip(),
+                            "role":     new_role,
+                            "status":   "Approved"
+                        }).execute()
+                        load_users.clear()
+                        st.success(f"User '{new_uname}' added.")
                         st.rerun()
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+                else:
+                    st.warning("Username and password required.")
+
+        # List & delete active users
+        for u in approved:
+            c1, c2, c3 = st.columns([3, 1, 1])
+            badge = {"Admin":"🔴","Doctor":"🟢","Nurse":"🟡",
+                     "Reception":"🔵","Technician":"🟠"}.get(u["role"],"⚪")
+            c1.markdown(f"{badge} **{u['username']}** — {u['role']}")
+
+            # Change role
+            roles = ["Doctor","Nurse","Technician","Reception","Admin"]
+            new_r = c2.selectbox("", roles,
+                index=roles.index(u["role"]) if u["role"] in roles else 0,
+                key=f"role_{u['username']}",
+                label_visibility="collapsed")
+            if new_r != u["role"]:
+                supabase.table("users").update({"role": new_r}) \
+                    .eq("username", u["username"]).execute()
+                load_users.clear()
+                st.rerun()
+
+            # Delete (protect admin)
+            if u["username"] != "admin":
+                if c3.button("🗑", key=f"del_{u['username']}", help="Delete user"):
+                    supabase.table("users").delete() \
+                        .eq("username", u["username"]).execute()
+                    load_users.clear()
+                    st.warning(f"Deleted: {u['username']}")
+                    st.rerun()
+            else:
+                c3.markdown("*(protected)*")
+
+        st.markdown("---")
+
+        # ── Clear Login History ───────────────────────────────────────────────
+        st.markdown("#### 🧹 Clear Login / Audit History")
+        col_a, col_b = st.columns(2)
+        if col_a.button("🗑 Clear Audit Trail", key="clear_audit"):
+            try:
+                supabase.table("audit_trail").delete().neq("id", 0).execute()
+                st.success("Audit trail cleared.")
+            except Exception as e:
+                st.error(f"Error: {e}")
+        if col_b.button("🗑 Clear Notifications", key="clear_notif"):
+            try:
+                supabase.table("notifications").delete().neq("id", 0).execute()
+                st.success("Notifications cleared.")
+            except Exception as e:
+                st.error(f"Error: {e}")
    
     # =========================================
 # 📂 SEARCHABLE RECORDS (ADMIN ONLY)

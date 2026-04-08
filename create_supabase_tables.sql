@@ -152,10 +152,19 @@ CREATE TABLE IF NOT EXISTS users (
     id         BIGSERIAL PRIMARY KEY,
     username   TEXT UNIQUE NOT NULL,
     password   TEXT,
+    name       TEXT,
     role       TEXT,
     status     TEXT DEFAULT 'Pending',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add name column if upgrading existing table
+ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;
+
+-- Insert default admin account (only if not exists)
+INSERT INTO users (username, password, name, role, status)
+VALUES ('admin', 'Admin@Hospital1', 'Administrator', 'Admin', 'Approved')
+ON CONFLICT (username) DO NOTHING;
 
 -- Enable Row Level Security (recommended)
 ALTER TABLE patients        ENABLE ROW LEVEL SECURITY;
