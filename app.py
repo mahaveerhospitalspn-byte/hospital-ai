@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import os
 import pandas as pd
@@ -9,21 +7,24 @@ import zipfile
 import shutil
 import requests
 import random
-
-from datetime import datetime,timedelta
+import threading
 import time
+import sqlite3
+from datetime import datetime, timedelta
 
+# ── Page config — MUST be the very first Streamlit call ──────────────────────
+st.set_page_config(
+    page_title="Mahaveer Hospital Clinical AI",
+    page_icon="🏥",
+    layout="wide"
+)
+
+# ── Module imports ────────────────────────────────────────────────────────────
 from hospital_summary import generate_hospital_summary
 from pharmacy_module import pharmacy_dashboard
 from opd import opd_reception_panel, opd_doctor_panel
 from ot_ai_app import ot_module
-import threading
-import time
-
-import sqlite3
 from opd_documentation import create_drug_master, import_large_drug_dataset
-
-
 from supabase import create_client
 from supabase_storage import (
     register_patient_sb, load_patient_info_sb, load_patient_name_sb,
@@ -43,47 +44,40 @@ from supabase_storage import (
 )
 from streamlit_autorefresh import st_autorefresh
 
-
-
-
-SUPABASE_URL = "https://ptkdegqftfcaqrvsbihk.supabase.co"
-
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0a2RlZ3FmdGZjYXFydnNiaWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxMjYzODUsImV4cCI6MjA5MDcwMjM4NX0.jI2mcxJ86uPaCExOmLEdN8XdEzctEul3-33Qc7Ug_dI"
-
+# ── Supabase client ───────────────────────────────────────────────────────────
+import os as _os
+SUPABASE_URL = _os.environ.get(
+    "SUPABASE_URL",
+    "https://ptkdegqftfcaqrvsbihk.supabase.co"
+)
+SUPABASE_KEY = _os.environ.get(
+    "SUPABASE_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0a2RlZ3FmdGZjYXFydnNiaWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxMjYzODUsImV4cCI6MjA5MDcwMjM4NX0.jI2mcxJ86uPaCExOmLEdN8XdEzctEul3-33Qc7Ug_dI"
+)
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# ── Session state defaults ────────────────────────────────────────────────────
+for _key, _val in {
+    "logged_in":        False,
+    "page":             "login",
+    "selected_patient": "",
+    "role":             "",
+    "user":             "",
+    "splash_done":      True,   # skip splash — causes blank screen on cloud
+}.items():
+    if _key not in st.session_state:
+        st.session_state[_key] = _val
 
-
+# ── One-time startup (cached — never reruns) ──────────────────────────────────
 @st.cache_resource(show_spinner=False)
 def _startup_init():
-    """Runs exactly once per server start — never on reruns."""
-    create_drug_master()
-    import_large_drug_dataset()
+    try:
+        create_drug_master()
+        import_large_drug_dataset()
+    except Exception:
+        pass  # Non-fatal if drug CSV not present on cloud
 
 _startup_init()
-
-
-if "splash_done" not in st.session_state:
-    st.session_state.splash_done = False
-
-# ✅ SAFE SESSION INIT (MUST BE FIRST STREAMLIT LOGIC)
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if "page" not in st.session_state:
-    st.session_state.page = "login"
-
-if "selected_patient" not in st.session_state:
-    st.session_state.selected_patient = ""
-
-if "role" not in st.session_state:
-    st.session_state.role = ""
-
-if "user" not in st.session_state:
-    st.session_state.user = ""
-
-
 
 
 def rebuild_registry_from_records():
@@ -902,11 +896,6 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 
-st.set_page_config(
-    page_title="Mahaveer Hospital Clinical AI",
-    page_icon="🏥",
-    layout="wide"
-)
 
 
 def generate_pdf(file_path, lines):
@@ -1075,71 +1064,81 @@ def generate_ai_ot_note_v2(patient_name, diagnosis, surgery_type, findings):
         return "AI FAILED"
 
 # =========================================================
-# SPLASH SCREEN
+# LOGIN PAGE
 # =========================================================
-# =========================================================
-# SPLASH SCREEN (NO LOGO)
-# =========================================================
-
-if not st.session_state.splash_done:
+if st.session_state.page == "login":
 
     st.markdown("""
     <style>
-    .center-text {
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:80vh;
-        font-size:42px;
-        font-weight:bold;
-        color:#1565C0;
-        text-align:center;
+    .login-wrap {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 2.5rem 2rem;
+        background: #f8f9fa;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
+    .login-title { text-align:center; color:#1565C0; font-size:24px; font-weight:700; margin-bottom:4px; }
+    .login-sub   { text-align:center; color:#888; font-size:13px; margin-bottom:1.5rem; }
     </style>
+    <div class="login-wrap">
+      <div class="login-title">🏥 Mahaveer Hospital</div>
+      <div class="login-sub">Clinical Management System</div>
+    </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(
-        """
-        <div class="center-text">
-        Mahaveer Hospital 
-        & Dental Care 
-        Pvt Ltd
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        username = st.text_input("Username", placeholder="Enter username", key="login_user")
+        password = st.text_input("Password", type="password", placeholder="Enter password", key="login_pass")
 
-    st.session_state.splash_done = True
-    st.session_state.page = "login"
+        if st.button("🔐 Login", use_container_width=True, key="login_btn"):
+            if not username.strip() or not password.strip():
+                st.warning("Please enter both username and password.")
+            else:
+                try:
+                    result = supabase.table("users") \
+                        .select("*") \
+                        .eq("username", username.strip()) \
+                        .eq("password", password.strip()) \
+                        .execute()
+                    matches = result.data
+                    if matches:
+                        user = matches[0]
+                        if user.get("status", "Approved") != "Approved":
+                            st.error("⏳ Account pending approval. Contact Admin.")
+                        else:
+                            role = user["role"]
+                            st.session_state.user     = username.strip()
+                            st.session_state.role     = role
+                            st.session_state.logged_in = True
+                            st.session_state.page = {
+                                "Doctor":     "doctor_dashboard",
+                                "Nurse":      "nurse_dashboard",
+                                "Technician": "tech_dashboard",
+                                "Reception":  "reception_dashboard",
+                                "Admin":      "admin_dashboard",
+                            }.get(role, "doctor_dashboard")
+                            st.rerun()
+                    else:
+                        st.error("❌ Invalid username or password.")
+                except Exception as e:
+                    st.error(f"Connection error: {e}")
 
-    st.rerun()
-# =========================================================
-# LOGIN PAGE
-# =========================================================
-
-# =========================================================
-# LOGIN PAGE
-# =========================================================
-
-# Login handled by page router below
-
-
-if st.session_state.get("logged_in"):
-
-    import threading
-    from sync_his_to_supabase import sync
-
-    def background_sync():
-        while True:
-            try:
-                sync()
-                time.sleep(5)
-            except:
-                time.sleep(5)
-
-    if "sync_started" not in st.session_state:
-        threading.Thread(target=background_sync, daemon=True).start()
+# ── Background HIS sync ───────────────────────────────────────────────────────
+if st.session_state.get("logged_in") and "sync_started" not in st.session_state:
+    try:
+        from sync_his_to_supabase import sync
+        def _bg_sync():
+            while True:
+                try: sync()
+                except Exception: pass
+                time.sleep(10)
+        threading.Thread(target=_bg_sync, daemon=True).start()
         st.session_state.sync_started = True
+    except Exception:
+        pass  # sync module may not be available on cloud
+
 
 if st.session_state.page == "doctor_dashboard":
      
