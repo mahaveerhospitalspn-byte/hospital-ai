@@ -1127,12 +1127,28 @@ if st.session_state.page == "login":
             pass
     _ensure_default_admin()
 
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
-        tab_login, tab_signup = st.tabs(["🔐  Login", "📝  Sign Up"])
+    # ── Constrain width with CSS (no columns — avoids tab clipping) ────────
+    st.markdown("""
+    <style>
+    .login-card {
+        max-width: 460px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    /* Make tabs full width and equal size */
+    .stTabs { max-width: 460px; margin: 0 auto; }
+    .stTabs [data-baseweb="tab"] { flex: 1 1 50%; min-width: 0; }
+    </style>
+    <div class="login-card"></div>
+    """, unsafe_allow_html=True)
 
-        # ── LOGIN TAB ────────────────────────────────────────────────────────
-        with tab_login:
+    # Tabs at full page width (centred by CSS above, not by columns)
+    tab_login, tab_signup = st.tabs(["🔐  Login", "📝  Sign Up"])
+
+    # ── LOGIN TAB ────────────────────────────────────────────────────────────
+    with tab_login:
+        _, col, _ = st.columns([1, 2, 1])
+        with col:
             st.markdown("<br>", unsafe_allow_html=True)
             l_user = st.text_input("Username", placeholder="Enter username", key="l_user")
             l_pass = st.text_input("Password", type="password", placeholder="Enter password", key="l_pass")
@@ -1174,18 +1190,20 @@ if st.session_state.page == "login":
             st.markdown("---")
             st.caption("🔑 Default Admin — username: `admin`  password: `Admin@Hospital1`")
 
-        # ── SIGN UP TAB ──────────────────────────────────────────────────────
-        with tab_signup:
+    # ── SIGN UP TAB ──────────────────────────────────────────────────────────
+    with tab_signup:
+        _, col2, _ = st.columns([1, 2, 1])
+        with col2:
             st.markdown("<br>", unsafe_allow_html=True)
-            st.info("New accounts require Admin approval before you can log in.")
+            st.info("New accounts need Admin approval before you can log in.")
 
-            s_name = st.text_input("Full Name", placeholder="Dr. / Staff name", key="s_name")
-            s_user = st.text_input("Username", placeholder="Choose a username", key="s_user")
-            s_pass = st.text_input("Password", type="password",
-                                   placeholder="Min 6 characters", key="s_pass")
-            s_pass2 = st.text_input("Confirm Password", type="password",
-                                    placeholder="Repeat password", key="s_pass2")
-            s_role = st.selectbox("Role",
+            s_name  = st.text_input("Full Name",         placeholder="Dr. / Staff name",  key="s_name")
+            s_user  = st.text_input("Username",           placeholder="Choose a username", key="s_user")
+            s_pass  = st.text_input("Password",           type="password",
+                                    placeholder="Min 6 characters",                       key="s_pass")
+            s_pass2 = st.text_input("Confirm Password",   type="password",
+                                    placeholder="Repeat password",                        key="s_pass2")
+            s_role  = st.selectbox("Role",
                 ["Doctor", "Nurse", "Technician", "Reception"],
                 key="s_role")
             st.markdown("<br>", unsafe_allow_html=True)
@@ -1199,13 +1217,12 @@ if st.session_state.page == "login":
                     st.error("Passwords do not match.")
                 else:
                     try:
-                        # Check username not taken
                         existing = supabase.table("users") \
                             .select("username") \
                             .eq("username", s_user.strip()) \
                             .execute()
                         if existing.data:
-                            st.error("❌ Username already exists. Choose another.")
+                            st.error("❌ Username already taken. Choose another.")
                         else:
                             supabase.table("users").insert({
                                 "username": s_user.strip(),
@@ -1216,7 +1233,7 @@ if st.session_state.page == "login":
                             }).execute()
                             st.success(
                                 f"✅ Account requested for **{s_name}** ({s_role}). "
-                                "Please wait for Admin approval."
+                                "An Admin will approve it shortly."
                             )
                     except Exception as e:
                         st.error(f"Error: {e}")
